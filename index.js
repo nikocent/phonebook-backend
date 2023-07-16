@@ -64,10 +64,11 @@ app.post('/api/persons', (req, res) => {
     if (!body.name || !body.number) return res.status(400).json({
         error: 'content missing'
     })
-    if (persons.find(item => item.name === body.name) !== undefined) return res.status(400).json({
+    
+    /*if (persons.find(item => item.name === body.name) !== undefined) return res.status(400).json({
         error: 'name must be unique'
     })
-
+    */
 
     const person = new Person({
         name: body.name,
