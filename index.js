@@ -49,13 +49,30 @@ app.get('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id)
     Person
       .findById(id)
-      .then(person => res.json(person))
+      .then(person => {
+        if (note) {
+          res.json(person)
+        } else {
+          res.status(404).end()
+        }
+      })
+      .catch(err => {
+        console.log(err)
+        res.status(500).end()
+      })
 })
 
-app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    persons = persons.filter(item => item.id !== id)
-    res.status(204).end()
+app.delete('/api/persons/:id', (req, res, next) => {
+    const id = req.params.id
+    
+    Person
+      .findByIdAndRemove(id)
+      .then(result => {
+        res.status(204).end()
+      })
+      .catch(err => {
+        next(err)
+      })
 })
 
 app.post('/api/persons', (req, res) => {
@@ -64,11 +81,6 @@ app.post('/api/persons', (req, res) => {
     if (!body.name || !body.number) return res.status(400).json({
         error: 'content missing'
     })
-    
-    /*if (persons.find(item => item.name === body.name) !== undefined) return res.status(400).json({
-        error: 'name must be unique'
-    })
-    */
 
     const person = new Person({
         name: body.name,
