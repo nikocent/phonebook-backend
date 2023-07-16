@@ -10,34 +10,12 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 app.use(express.static('build'))
 app.use(express.json())
 
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
 
 app.get('/api/persons', (req, res) => {
     Person
       .find({})
       .then(result => res.json(result))
-  })
+})
 
 app.get('/info', (req, res) => {
     res.send(`
@@ -45,20 +23,20 @@ app.get('/info', (req, res) => {
     <p>${new Date}</p>
     `)
 })
-app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
+
+app.get('/api/persons/:id', (req, res, next) => {
+    const id = req.params.id
     Person
       .findById(id)
       .then(person => {
-        if (note) {
+        if (person) {
           res.json(person)
         } else {
           res.status(404).end()
         }
       })
       .catch(err => {
-        console.log(err)
-        res.status(500).end()
+        next(err)
       })
 })
 
@@ -93,6 +71,23 @@ app.post('/api/persons', (req, res) => {
         res.json(savedPerson)
       })
 })
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  console.log( `Error: ${error.message}`)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+  response.status(error.status).send(error.message)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
