@@ -59,7 +59,7 @@ app.post('/api/persons', (req, res, next) => {
     const body = req.body
 
     if (!body.name || !body.number) return res.status(400).json({
-        error: 'content missing'
+        error: 'Content missing'
     })
 
     const person = new Person({
@@ -106,7 +106,6 @@ const errorHandler = (error, request, response, next) => {
   } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
   }
-
   next(error)
 }
 
