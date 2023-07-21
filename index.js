@@ -12,13 +12,13 @@ app.use(express.json())
 
 
 app.get('/api/persons', (req, res) => {
-    Person
-      .find({})
-      .then(result => res.json(result))
+  Person
+    .find({})
+    .then(result => res.json(result))
 })
 
 app.get('/info', (req, res) => {
-  Person.countDocuments({}).then(count =>{
+  Person.countDocuments({}).then(count => {
     res.send(`
     <p>Phonebook has info for ${count} people</p> 
     <p>${new Date}</p>
@@ -27,63 +27,63 @@ app.get('/info', (req, res) => {
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
-    const id = req.params.id
-    Person
-      .findById(id)
-      .then(person => {
-        if (person) {
-          res.json(person)
-        } else {
-          res.status(404).end()
-        }
-      })
-      .catch(err => {
-        next(err)
-      })
+  const id = req.params.id
+  Person
+    .findById(id)
+    .then(person => {
+      if (person) {
+        res.json(person)
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch(err => {
+      next(err)
+    })
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
-    const id = req.params.id
-    
-    Person
-      .findByIdAndRemove(id)
-      .then(result => {
-        res.status(204).end()
-      })
-      .catch(err => {
-        next(err)
-      })
+  const id = req.params.id
+
+  Person
+    .findByIdAndRemove(id)
+    .then(res => {
+      res.status(204).end()
+    })
+    .catch(err => {
+      next(err)
+    })
 })
 
 app.post('/api/persons', (req, res, next) => {
-    const body = req.body
+  const body = req.body
 
-    if (!body.name || !body.number) return res.status(400).json({
-        error: 'Content missing'
+  if (!body.name || !body.number) return res.status(400).json({
+    error: 'Content missing'
+  })
+
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  })
+
+  person
+    .save()
+    .then(savedPerson => {
+      res.json(savedPerson)
     })
-
-    const person = new Person({
-        name: body.name,
-        number: body.number,
-    })
-
-    person
-      .save()
-      .then(savedPerson => {
-        res.json(savedPerson)
-      })
-      .catch(err => next(err))
+    .catch(err => next(err))
 })
 
-app.put('/api/persons/:id', (req, res) => {
+app.put('/api/persons/:id', (req, res, next) => {
   const id = req.params.id
-  const { name, number } = request.body
+  const { name, number } = req.body
 
   Person
     .findByIdAndUpdate(
       id,
-      {name, number},
-      {new: true, runValidators: true, context: 'query'}
+      { name, number },
+      { new: true, runValidators: true, context: 'query' }
     )
     .then(updatedPerson => {
       res.json(updatedPerson)
