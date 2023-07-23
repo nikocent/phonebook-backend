@@ -47,7 +47,7 @@ app.delete('/api/persons/:id', (req, res, next) => {
 
   Person
     .findByIdAndRemove(id)
-    .then(res => {
+    .then(() => {
       res.status(204).end()
     })
     .catch(err => {
@@ -58,9 +58,6 @@ app.delete('/api/persons/:id', (req, res, next) => {
 app.post('/api/persons', (req, res, next) => {
   const body = req.body
 
-  if (!body.name || !body.number) return res.status(400).json({
-    error: 'Content missing'
-  })
 
   const person = new Person({
     name: body.name,
